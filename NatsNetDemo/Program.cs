@@ -6,22 +6,14 @@ var cts = new CancellationTokenSource();
 
 var subscription = Task.Run(async () =>
 {
-    await foreach (var msg in nats.SubscribeAsync<string>(subject: "foo").WithCancellation(cts.Token))
+    await foreach (var msg in nats.SubscribeAsync<string>(subject: "hello").WithCancellation(cts.Token))
     {
-        Console.WriteLine($"Received: {msg.Data}");
+        Console.WriteLine($"Received [{msg.Subject}]: {msg.Data}");
     }
 });
 
-// Give subscription time to start
-await Task.Delay(1000);
-
-for (var i = 0; i < 10; i++)
-{
-    await nats.PublishAsync(subject: "foo", data: $"Hello, World! {i}");
-}
-
-// Give subscription time to receive messages
-await Task.Delay(1000);
+// Subscription time before program disconnects
+await Task.Delay(15000);
 
 // Unsubscribe
 cts.Cancel();
